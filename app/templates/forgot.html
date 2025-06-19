@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-center items-center min-h-screen bg-black px-4">
+  <div class="w-full max-w-sm p-6 bg-gray-900 rounded-2xl shadow-lg text-white">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo LELE"
+           class="w-24 h-24 object-contain rounded-full">
+    </div>
+
+    <h2 class="text-2xl font-bold mb-6 text-center">Lupa Password?</h2>
+
+    {% if message %}
+    <div class="mb-4 p-3 bg-green-600 text-sm rounded shadow text-center">
+      {{ message }}
+    </div>
+    {% endif %}
+    
+    {% if error %}
+    <div class="mb-4 p-3 bg-red-600 text-sm rounded shadow text-center">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/forgot">
+      <div class="input-group">
+        <input type="email" name="email" placeholder=" " required>
+        <label>Masukkan Email</label>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 font-bold mt-3">
+        Kirim Link Reset
+      </button>
+    </form>
+
+    <p class="text-sm mt-4 text-center">
+      Ingat password?
+      <a href="/login" class="text-yellow-400 hover:underline">Masuk</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

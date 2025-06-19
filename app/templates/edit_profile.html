@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-6 p-6 bg-gray-900 rounded-xl shadow-lg">
+  <h2 class="text-2xl font-bold mb-4 text-yellow-400">Edit Profil</h2>
+
+  <form action="{{ url_for('main.edit_profile') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+
+    <!-- Input Nama -->
+    <div>
+      <label class="block mb-1 text-white">Nama Lengkap</label>
+      <input type="text" name="name" value="{{ user.name }}" required
+             class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
+             placeholder="Nama kamu...">
+    </div>
+
+    <!-- Input Username -->
+    <div>
+      <label class="block mb-1 text-white">Username</label>
+      <input type="text" name="username" value="{{ user.username }}" required
+             class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
+             placeholder="@username">
+    </div>
+
+    <!-- Input Bio -->
+    <div>
+      <label class="block mb-1 text-white">Bio</label>
+      <textarea name="bio" rows="4"
+                class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
+                placeholder="Ceritain tentang dirimu...">{{ user.bio }}</textarea>
+    </div>
+
+    <!-- Jenis Kelamin -->
+    <div>
+      <label class="block mb-1 text-white">Jenis Kelamin</label>
+      <select name="gender"
+              class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white text-xl">
+        <option value="unspecified" {% if user.gender == 'unspecified' %}selected{% endif %}>⚪ Tidak disebutkan</option>
+        <option value="male" {% if user.gender == 'male' %}selected{% endif %}>♂ Laki-laki</option>
+        <option value="female" {% if user.gender == 'female' %}selected{% endif %}>♀ Perempuan</option>
+      </select>
+    </div>
+
+    <!-- Foto Profil -->
+    <div>
+      <label class="block mb-1 text-white">Foto Profil</label>
+      <input type="file" name="photo"
+             class="w-full text-white">
+    </div>
+
+    <!-- Tombol Submit -->
+    <div class="text-right">
+      <button type="submit"
+              class="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 font-semibold">
+        <i class="fas fa-save"></i> Simpan Perubahan
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

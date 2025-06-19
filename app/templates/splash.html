@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LELE - Splash</title>
+  <meta http-equiv="refresh" content="3;url=/login">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .splash-logo {
+      width: 60vw;
+      max-width: none;
+      animation: fadeZoom 1.2s ease-in-out forwards;
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    @keyframes fadeZoom {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="{{ url_for('static', filename='images/logo.png') }}" alt="LELE Logo" class="splash-logo">
+</body>
+</html>

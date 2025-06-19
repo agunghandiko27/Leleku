@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="story-fullscreen fixed inset-0 bg-black z-50 flex items-center justify-center">
+
+    <div class="relative w-full h-full flex items-center justify-center">
+
+        <!-- Gambar Story -->
+        <img src="{{ url_for('static', filename='story_uploads/' + story.image) }}"
+             alt="Story" class="max-h-full max-w-full object-contain">
+
+        <!-- Progress Bar -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-gray-600">
+            <div id="story-progress" class="h-full bg-yellow-400 transition-all duration-100 ease-linear" style="width: 0%;"></div>
+        </div>
+
+        <!-- Profil & Nama (diberi jarak dari progress bar) -->
+        <div class="absolute top-6 left-4 flex items-center z-30">
+            <img src="{{ url_for('static', filename='images/' ~ (user.photo if user.photo else 'default.jpg')) }}" 
+                 alt="Profile" class="w-12 h-12 rounded-full border-2 border-white mr-2">
+            <div>
+                <div class="text-white font-semibold text-sm">{{ user.name }}</div>
+                <div class="text-gray-300 text-xs">{{ story.timestamp|time_ago }}</div>
+            </div>
+        </div>
+
+        <!-- Tombol Menu Hapus & Close -->
+        <div class="absolute top-6 right-4 z-20 flex items-center space-x-3">
+            {% if story.user_id == current_user.id %}
+            <button onclick="toggleDropdown()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-700 text-white text-1xl shadow-lg">
+                &#9776;
+            </button>
+            {% endif %}
+            <a href="{{ url_for('main.home') }}" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 text-white text-1xl shadow-lg">
+                &#10005;
+            </a>
+        </div>
+
+        {% if story.user_id == current_user.id %}
+        <div id="dropdown-menu" class="absolute top-20 right-4 w-40 bg-white rounded-lg shadow-lg hidden z-30">
+            <a href="{{ url_for('main.delete_story', story_id=story.id) }}" class="block px-4 py-2 text-sm text-red-500 hover:bg-gray-100">Hapus Cerita</a>
+        </div>
+        {% endif %}
+
+        <!-- Like Button -->
+        <div class="absolute bottom-24 left-4 z-20">
+            {% if liked %}
+            <span class="w-10 h-10 flex items-center justify-center rounded-full bg-red-500 text-white text-3xl shadow-lg cursor-pointer"
+                  onclick="toggleLike({{ story.id }})">&#10084;</span>
+            {% else %}
+            <span class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-700 text-white text-3xl shadow-lg cursor-pointer"
+                  onclick="toggleLike({{ story.id }})">&#10084;</span>
+            {% endif %}
+        </div>
+
+        <!-- Form Reply -->
+        <div class="absolute bottom-4 left-0 right-0 px-4 z-20">
+            <form method="POST" action="{{ url_for('main.reply_story', story_id=story.id) }}" class="flex">
+                <input type="text" name="message" placeholder="Balas story..." class="flex-grow rounded-l-lg p-2 bg-gray-800 text-white" required>
+                <button type="submit" class="bg-yellow-400 px-4 rounded-r-lg">Kirim</button>
+            </form>
+        </div>
+
+        <!-- Tombol Previous -->
+        {% if index > 0 %}
+        <div class="absolute top-1/2 left-4 transform -translate-y-1/2 z-30">
+            <a href="{{ url_for('main.view_story', user_id=story.user_id, index=index-1) }}"
+               class="w-10 h-10 flex items-center justify-center rounded-full bg-black bg-opacity-60 border border-white text-white text-3xl shadow-lg">
+                &#x276E;
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Tombol Next -->
+        {% if index + 1 < stories|length %}
+        <div class="absolute top-1/2 right-4 transform -translate-y-1/2 z-30">
+            <a href="{{ url_for('main.view_story', user_id=story.user_id, index=index+1) }}"
+               class="w-10 h-10 flex items-center justify-center rounded-full bg-black bg-opacity-60 border border-white text-white text-3xl shadow-lg">
+                &#x276F;
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<script>
+    let progress = document.getElementById('story-progress');
+    let width = 0;
+    let timer = setInterval(() => {
+        width++;
+        progress.style.width = width + "%";
+        if (width >= 100) {
+            clearInterval(timer);
+            {% if index + 1 < stories|length %}
+                window.location.href = "{{ url_for('main.view_story', user_id=story.user_id, index=index+1) }}";
+            {% else %}
+                window.location.href = "{{ url_for('main.home') }}";
+            {% endif %}
+        }
+    }, 100);
+
+    function toggleDropdown() {
+        let menu = document.getElementById('dropdown-menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function toggleLike(storyId) {
+        fetch("/story/like/" + storyId, { method: "POST" })
+            .then(() => location.reload());
+    }
+</script>
+
+{% endblock %}

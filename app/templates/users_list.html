@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-6">
+  <h2 class="text-xl font-bold text-yellow-400 mb-4">Mulai Chat Baru</h2>
+
+  <!-- List semua user kecuali current_user -->
+  <div class="space-y-2">
+    {% for user in users %}
+    <a href="{{ url_for('main.messages', user_id=user.id) }}" class="flex items-center gap-3 bg-gray-900 rounded-xl p-3 hover:bg-gray-800 border border-gray-800 shadow">
+      <img src="{{ url_for('static', filename='uploads/' ~ user.photo) }}" class="w-12 h-12 rounded-full object-cover border border-yellow-400">
+      <div>
+        <h3 class="text-white font-semibold">{{ user.name }}</h3>
+        <p class="text-gray-400 text-xs">{{ user.username }}</p>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

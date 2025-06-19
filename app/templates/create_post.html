@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-xl mx-auto px-4 pt-20 space-y-6">
+
+  <!-- 🔙 Back Button -->
+  <div class="flex items-center gap-3 text-yellow-400">
+    <a href="{{ url_for('main.home') }}" class="text-xl">
+      <i class="bi bi-arrow-left-circle-fill"></i>
+    </a>
+    <span class="text-sm">Kembali ke Beranda</span>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" class="space-y-4">
+
+    <!-- 📝 Textarea -->
+    <textarea name="text" rows="8"
+      class="w-full p-4 text-white bg-black border border-gray-700 rounded-lg text-sm focus:outline-none resize-none"
+      placeholder="Tulis sesuatu..."></textarea>
+
+    <!-- 🖼️ Preview Gambar -->
+    <div id="image-preview-container" class="hidden">
+      <img id="image-preview" class="mt-2 max-h-64 rounded-lg border border-gray-700" />
+    </div>
+
+    <!-- 📎 Upload + 🚀 Submit -->
+    <div class="flex justify-between items-center">
+      <!-- Upload Gambar -->
+      <label for="upload-photo" class="text-yellow-400 cursor-pointer flex items-center gap-2 hover:text-yellow-500 text-sm">
+        <i class="bi bi-image-fill text-xl"></i> Upload Foto
+      </label>
+      <input type="file" name="image" id="upload-photo" accept="image/*" class="hidden">
+
+      <!-- Submit Post -->
+      <button type="submit" class="text-yellow-400 hover:text-yellow-500 text-xl">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- JavaScript untuk preview gambar -->
+<script>
+  const fileInput = document.getElementById('upload-photo');
+  const previewImg = document.getElementById('image-preview');
+  const previewContainer = document.getElementById('image-preview-container');
+
+  fileInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewContainer.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      previewContainer.classList.add('hidden');
+      previewImg.src = "";
+    }
+  });
+</script>
+{% endblock %}

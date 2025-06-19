@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-center items-center min-h-screen bg-black px-4">
+  <div class="w-full max-w-sm p-6 bg-gray-900 rounded-2xl shadow-lg text-white">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo LELE"
+           class="w-32 h-32 object-contain rounded-full">
+    </div>
+
+    <h2 class="text-2xl font-bold mb-6 text-center">Daftar ke <span class="text-yellow-400">LELE</span></h2>
+
+    <form id="registerForm" method="POST" action="/register">
+
+      <!-- Nama Lengkap -->
+      <div class="input-group">
+        <input type="text" name="name" placeholder=" " required>
+        <label>Nama Lengkap</label>
+      </div>
+
+      <!-- Username -->
+      <div class="input-group">
+        <input type="text" name="username" placeholder=" " required maxlength="20">
+        <label>Nama Pengguna</label>
+        <small id="username-error" class="text-red-500 text-xs mt-1 block"></small>
+      </div>
+
+      <!-- Email -->
+      <div class="input-group">
+        <input type="email" name="email" placeholder=" " required>
+        <label>Email</label>
+        <small id="email-error" class="text-red-500 text-xs mt-1 block"></small>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <input type="password" name="password" id="regpw" placeholder=" " required oninput="checkStrength(this.value)">
+        <label>Password</label>
+        <i class="bi bi-eye eye-icon" onclick="togglePassword('regpw', this)"></i>
+      </div>
+
+      <!-- Indikator Kekuatan Password -->
+      <div id="strength-bar" class="w-full h-2 rounded mb-4 transition-all duration-300"></div>
+      <p id="strength-text" class="text-xs text-center mb-2"></p>
+
+      <!-- Konfirmasi Password -->
+      <div class="input-group">
+        <input type="password" name="confirm" id="regpw2" placeholder=" " required>
+        <label>Konfirmasi Password</label>
+        <i class="bi bi-eye eye-icon" onclick="togglePassword('regpw2', this)"></i>
+      </div>
+
+      <!-- Tombol Daftar -->
+      <button type="submit"
+              class="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 font-bold">
+        Daftar
+      </button>
+
+      <!-- Link ke login -->
+      <p class="text-sm mt-4 text-center">
+        Sudah punya akun?
+        <a href="/login" class="text-yellow-400 hover:underline">Masuk</a>
+      </p>
+
+    </form>
+  </div>
+</div>
+
+<!-- AJAX Validasi -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('registerForm');
+  const usernameInput = document.querySelector('input[name="username"]');
+  const emailInput = document.querySelector('input[name="email"]');
+  const usernameError = document.getElementById('username-error');
+  const emailError = document.getElementById('email-error');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  // Realtime normalisasi username
+  usernameInput.addEventListener('input', () => {
+    let val = usernameInput.value;
+    val = val.replace(/^@+/, '');
+    val = val.replace(/\s+/g, '_');
+    val = val.replace(/[^a-zA-Z0-9_.]/g, '');
+    val = val.toLowerCase();
+    val = val.slice(0, 20);
+    usernameInput.value = '@' + val;
+  });
+
+  // Submit form pakai fetch POST
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Reset error
+    usernameError.textContent = "";
+    emailError.textContent = "";
+
+    const username = usernameInput.value;
+    const email = emailInput.value;
+
+    // Validasi username client-side
+    if (!/^@[a-z0-9_.]+$/.test(username)) {
+      usernameError.textContent = "* Username hanya boleh berisi huruf, angka, '_' atau '.' dan harus diawali '@'";
+      return;
+    }
+
+    // Cek username/email via AJAX
+    const res = await fetch('/check_user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email })
+    });
+
+    const data = await res.json();
+    let hasError = false;
+
+    if (data.username_error) {
+      usernameError.textContent = "* " + data.username_error;
+      hasError = true;
+    }
+
+    if (data.email_error) {
+      emailError.textContent = "* " + data.email_error;
+      hasError = true;
+    }
+
+    // Jika tidak ada error → kirim form via fetch POST
+    if (!hasError) {
+      const formData = new FormData(form);
+
+      // Feedback loading
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = "Memproses...";
+
+      try {
+        const postRes = await fetch(form.action, {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await postRes.json();
+        if (result.redirect_url) {
+          window.location.href = result.redirect_url;
+        } else {
+          alert("Registrasi gagal. Silakan coba lagi.");
+        }
+      } catch (err) {
+        alert("Terjadi kesalahan. Coba lagi.");
+        console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+  });
+});
+</script>
+
+
+<!-- JavaScript Kekuatan Password -->
+<script>
+  function checkStrength(password) {
+    const bar = document.getElementById("strength-bar");
+    const text = document.getElementById("strength-text");
+
+    const hasLetters = /[a-zA-Z]/.test(password);
+    const hasNumbers = /[0-9]/.test(password);
+    const minLength = password.length >= 8;
+
+    if (!minLength) {
+      bar.style.backgroundColor = "#dc2626"; // merah
+      bar.style.width = "33%";
+      text.textContent = "Minimal 8 karakter";
+      text.className = "text-red-500";
+    } else if (hasLetters && hasNumbers) {
+      bar.style.backgroundColor = "#16a34a"; // hijau
+      bar.style.width = "100%";
+      text.textContent = "Kuat";
+      text.className = "text-green-500";
+    } else {
+      bar.style.backgroundColor = "#facc15"; // kuning
+      bar.style.width = "66%";
+      text.textContent = "Gunakan kombinasi huruf & angka";
+      text.className = "text-yellow-400";
+    }
+  }
+</script>
+{% endblock %}

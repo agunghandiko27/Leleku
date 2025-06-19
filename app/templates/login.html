@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-center items-center min-h-screen bg-black px-4">
+  <div class="w-full max-w-sm p-6 bg-gray-900 rounded-2xl shadow-lg text-white">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo LELE"
+           class="w-32 h-32 object-contain rounded-full">
+    </div>
+
+    <h2 class="text-2xl font-bold mb-6 text-center">Masuk ke <span class="text-yellow-400">LELE</span></h2>
+
+    <!-- Tempat error AJAX -->
+    <div id="ajax-error" class="mb-4 p-3 bg-red-600 text-white text-sm rounded shadow text-center hidden"></div>
+
+    {% if error %}
+    <div class="mb-4 p-3 bg-red-600 text-white text-sm rounded shadow text-center">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form id="loginForm" method="POST" action="/login">
+
+      <!-- Email atau Username -->
+      <div class="input-group">
+        <input type="text" name="identity" placeholder=" " required>
+        <label>Email atau Nama Pengguna</label>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <input type="password" name="password" id="loginpw" placeholder=" " required>
+        <label>Password</label>
+        <i class="bi bi-eye eye-icon" onclick="togglePassword('loginpw', this)"></i>
+      </div>
+
+      <!-- Ingat Saya -->
+      <div class="flex items-center mb-4 mt-1">
+        <input type="checkbox" name="remember" id="remember" class="mr-2">
+        <label for="remember" class="text-sm">Ingat saya</label>
+      </div>
+
+      <!-- Tombol Masuk -->
+      <button type="submit"
+              class="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 font-bold">
+        Masuk
+      </button>
+
+      <!-- Link ke daftar -->
+      <p class="text-sm mt-4 text-center">
+        Belum punya akun?
+        <a href="/register" class="text-yellow-400 hover:underline">Daftar</a>
+      </p>
+
+      <!-- Link lupa password -->
+      <p class="text-sm mt-2 text-center">
+        <a href="/forgot" class="text-yellow-400 hover:underline">Lupa Password?</a>
+      </p>
+
+    </form>
+  </div>
+</div>
+
+<!-- AJAX login handler -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
+  const errorBox = document.getElementById('ajax-error');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const identity = formData.get("identity");
+    const password = formData.get("password");
+    const remember = formData.get("remember") === "on";
+
+    errorBox.classList.add("hidden");
+    errorBox.textContent = "";
+
+    const response = await fetch("/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ identity, password, remember })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      window.location.href = data.redirect || "/";
+    } else {
+      errorBox.textContent = data.message || "Login gagal";
+      errorBox.classList.remove("hidden");
+    }
+  });
+});
+</script>
+{% endblock %}

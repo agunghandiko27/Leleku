@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-center items-center min-h-screen bg-black px-4">
+  <div class="w-full max-w-sm p-6 bg-gray-900 rounded-2xl shadow-lg text-white">
+
+    <h2 class="text-2xl font-bold mb-6 text-center text-yellow-400">Reset Password</h2>
+
+    {% if error %}
+    <div class="mb-4 p-3 bg-red-600 text-white text-sm rounded shadow text-center">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    {% if message %}
+    <div class="mb-4 p-3 bg-green-600 text-white text-sm rounded shadow text-center">
+      {{ message }}
+    </div>
+    {% endif %}
+
+    <form method="POST" onsubmit="return validatePassword()">
+      <div class="input-group">
+        <input type="password" name="password" id="newPassword" placeholder=" " required>
+        <label>Password Baru</label>
+      </div>
+
+      <div id="strengthMessage" class="text-sm mt-1 text-center text-yellow-300"></div>
+
+      <div class="input-group mt-4">
+        <input type="password" name="confirm" id="confirmPassword" placeholder=" " required>
+        <label>Konfirmasi Password</label>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-yellow-400 text-black py-2 rounded hover:bg-yellow-300 font-bold mt-4">
+        Atur Ulang Password
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const passwordInput = document.getElementById("newPassword");
+  const strengthMessage = document.getElementById("strengthMessage");
+
+  function validatePassword() {
+    const password = passwordInput.value;
+    const confirm = document.getElementById("confirmPassword").value;
+
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+
+    if (password.length < 8 || !hasLetter || !hasNumber) {
+      alert("Password harus minimal 8 karakter, mengandung huruf dan angka.");
+      return false;
+    }
+
+    if (password !== confirm) {
+      alert("Konfirmasi password tidak cocok.");
+      return false;
+    }
+
+    return true;
+  }
+
+  passwordInput.addEventListener("input", () => {
+    const password = passwordInput.value;
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+
+    if (password.length < 8) {
+      strengthMessage.textContent = "Minimal 8 karakter";
+      strengthMessage.className = "text-red-400 text-sm text-center";
+    } else if (!hasLetter || !hasNumber) {
+      strengthMessage.textContent = "Harus mengandung huruf dan angka";
+      strengthMessage.className = "text-orange-400 text-sm text-center";
+    } else {
+      strengthMessage.textContent = "Password valid";
+      strengthMessage.className = "text-green-400 text-sm text-center";
+    }
+  });
+</script>
+{% endblock %}

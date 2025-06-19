@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto bg-gray-900 p-6 rounded-2xl shadow-md mt-6 space-y-5 border border-gray-800">
+  <h2 class="text-yellow-400 text-2xl font-semibold">Edit Postingan</h2>
+
+  <form action="{{ url_for('main.edit_post', post_id=post.id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+    
+    <textarea
+      name="text"
+      rows="4"
+      placeholder="Edit caption kamu..."
+      class="w-full bg-black text-white border border-gray-700 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+    >{{ post.text }}</textarea>
+
+    {% if post.image %}
+    <div>
+      <p class="text-sm text-gray-400 mb-1">Gambar saat ini:</p>
+      <img src="{{ url_for('static', filename='uploads/' + post.image) }}" class="w-full max-h-80 object-cover rounded border border-gray-700">
+    </div>
+    {% endif %}
+
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">Ganti gambar (opsional):</label>
+      <input
+        type="file"
+        name="image"
+        accept="image/*"
+        class="text-white file:bg-yellow-400 file:text-black file:rounded-lg file:px-4 file:py-1.5 file:border-none file:font-medium"
+      >
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button type="submit" class="bg-yellow-400 text-black font-semibold px-5 py-2 rounded-lg hover:bg-yellow-500 transition">Simpan</button>
+      <a href="{{ url_for('main.home') }}" class="text-gray-400 hover:text-yellow-400 px-5 py-2 transition">Batal</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

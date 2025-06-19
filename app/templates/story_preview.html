@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto py-8 pt-16">
+
+    <h2 class="text-xl font-semibold mb-4 text-white">Unggah Story Baru</h2>
+
+    <!-- Tambahan informasi user -->
+    <div class="mb-4">
+        <p class="text-white text-lg font-bold">
+            {{ user.full_name }}
+        </p>
+        <p class="text-gray-400 text-sm">
+            {% if story and story.created_at %}
+                Diposting pada: {{ story.created_at.strftime('%d %B %Y %H:%M') }}
+            {% else %}
+                Story belum diposting
+            {% endif %}
+        </p>
+    </div>
+
+    <form id="story-form" method="POST" enctype="multipart/form-data" class="bg-dark p-6 rounded-lg shadow-lg">
+        <label class="block mb-2 text-white">Pilih Gambar / Video:</label>
+        <input type="file" name="story_file" id="story-file" accept="image/*,video/*"
+               onchange="previewFile()" required
+               class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-yellow-400 file:text-white">
+
+        <div id="preview-container" class="mt-4 hidden">
+            <h3 class="text-white mb-2">Preview Story:</h3>
+            <img id="preview-img" class="w-full rounded-lg mb-4" />
+            <div class="flex justify-between">
+                <button type="button" onclick="cancelPreview()" class="px-4 py-2 bg-red-500 text-white rounded-lg">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">Unggah</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<script>
+function previewFile() {
+    const file = document.getElementById('story-file').files[0];
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+
+    if (!file) {
+        previewContainer.classList.add('hidden');
+        return;
+    }
+
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            previewImg.src = reader.result;
+            previewImg.style.display = "block";
+        }
+        reader.readAsDataURL(file);
+    } else {
+        previewImg.style.display = "none";
+    }
+    previewContainer.classList.remove('hidden');
+}
+
+function cancelPreview() {
+    document.getElementById('preview-container').classList.add('hidden');
+    document.getElementById('story-file').value = '';
+}
+</script>
+{% endblock %}

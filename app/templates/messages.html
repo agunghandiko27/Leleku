@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-20 bg-gray-900 rounded-2xl shadow-lg h-[80vh] flex flex-col">
+
+  <!-- Header -->
+  <div class="bg-black text-white p-4 rounded-t-2xl flex items-center gap-3 border-b border-gray-800">
+    <img src="{{ url_for('static', filename=(('uploads/' ~ receiver.photo) if receiver.photo and receiver.photo.strip() else 'images/default.jpg')) }}"
+     alt="Foto Profil"
+     class="w-10 h-10 rounded-full object-cover border border-yellow-400">
+    <div>
+      <h2 class="font-bold text-yellow-400 text-lg">{{ receiver.username }}</h2>
+      <p class="text-gray-400 text-sm">Obrolan Pribadi</p>
+    </div>
+  </div>
+
+  <!-- Pesan -->
+  <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-800">
+    {% for msg in messages %}
+    <div class="flex {% if msg.sender_id == current_user.id %}justify-end{% else %}justify-start{% endif %}">
+      <div class="{% if msg.sender_id == current_user.id %}bg-yellow-400 text-black{% else %}bg-gray-700 text-white{% endif %} p-2 px-3 rounded-2xl max-w-xs">
+        {% if msg.image %}
+        <img src="{{ url_for('static', filename='messages/' ~ msg.image) }}" class="rounded-lg mb-1 max-w-[200px]">
+        {% endif %}
+        <div class="text-sm whitespace-pre-line">{{ msg.text }}</div>
+        <div class="text-xs text-right text-gray-300 mt-1">{{ msg.timestamp.strftime('%H:%M') }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Form Kirim Pesan -->
+  <form id="message-form" class="p-4 bg-black border-t border-gray-800 flex gap-2" enctype="multipart/form-data">
+    <input type="text" id="message-text" name="text" placeholder="Tulis pesan..." class="flex-1 p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none">
+    <input type="file" id="image-input" name="image" accept="image/*" class="hidden">
+    <label for="image-input" class="text-white px-3 flex items-center cursor-pointer hover:text-yellow-400"><i class="fas fa-image"></i></label>
+    <button type="submit" class="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 font-bold">Kirim</button>
+  </form>
+
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  const form = document.getElementById('message-form');
+  const chatBox = document.getElementById('chat-box');
+  const receiverId = {{ receiver.id }};
+  const currentUserId = {{ current_user.id }};
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = document.getElementById('message-text').value.trim();
+    const imageInput = document.getElementById('image-input');
+    if (!text && !imageInput.files.length) return;
+
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('receiver_id', receiverId);
+    if (imageInput.files.length) formData.append('image', imageInput.files[0]);
+
+    const response = await fetch('/send_message', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+    if (result.success) {
+      document.getElementById('message-text').value = '';
+      imageInput.value = '';
+    }
+  });
+
+  socket.on('new_message', (data) => {
+    if ((data.sender_id == currentUserId && data.receiver_id == receiverId) || (data.sender_id == receiverId && data.receiver_id == currentUserId)) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = "flex " + (data.sender_id == currentUserId ? "justify-end" : "justify-start");
+      const bubble = `
+        <div class="${data.sender_id == currentUserId ? 'bg-yellow-400 text-black' : 'bg-gray-700 text-white'} p-2 px-3 rounded-2xl max-w-xs">
+          ${data.image ? `<img src="/static/messages/${data.image}" class="rounded-lg mb-1 max-w-[200px]">` : ''}
+          <div class="text-sm whitespace-pre-line">${data.text || ''}</div>
+          <div class="text-xs text-right text-gray-300 mt-1">${data.time}</div>
+        </div>`;
+      msgDiv.innerHTML = bubble;
+      chatBox.appendChild(msgDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  });
+
+  // Scroll ke bawah saat halaman dimuat
+  window.onload = () => {
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+</script>
+{% endblock %}

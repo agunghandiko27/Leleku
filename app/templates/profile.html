@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-20 p-6 bg-gray-900 rounded-2xl shadow-lg">
+  <div class="flex items-center space-x-5">
+    <img src="{{ url_for('static', filename='images/' ~ (user.photo if user.photo else 'default.jpg')) }}"
+     alt="Foto Profil"
+     class="w-24 h-24 rounded-full border-4 border-yellow-400 object-cover shadow-md">
+
+    <div class="flex-1">
+      <h2 class="text-2xl font-bold text-white">
+        {{ user.name }}
+      </h2>
+      <p class="text-sm text-gray-400">
+        {{ user.username }}
+        {% if user.is_verified %}
+          <i class="bi bi-patch-check-fill text-blue-400 text-sm ml-1"></i>
+        {% endif %}
+      </p>
+
+      <div class="flex items-center gap-4 mt-2 text-white text-sm">
+        <div>
+          <span id="followers-count" class="font-semibold text-yellow-400">{{ followers|length }}</span> Followers
+        </div>
+        <div>
+          <span class="font-semibold text-yellow-400">{{ following|length }}</span> Mengikuti
+        </div>
+      </div>
+
+      <div class="mt-2 text-2xl">
+        {% if user.gender == "male" %}
+          <i class="fas fa-mars text-blue-400"></i>
+        {% elif user.gender == "female" %}
+          <i class="fas fa-venus text-pink-400"></i>
+        {% else %}
+          <i class="fas fa-genderless text-gray-400"></i>
+        {% endif %}
+      </div>
+
+      {% if current_user.is_authenticated and current_user.id != user.id %}
+        <div class="mt-4">
+          <button id="follow-btn"
+                  data-user-id="{{ user.id }}"
+                  class="px-4 py-1 rounded-lg font-semibold text-sm transition duration-200 shadow
+                         {% if current_user.is_following(user) %}
+                           bg-red-500 hover:bg-red-600 text-white
+                         {% else %}
+                           bg-yellow-400 hover:bg-yellow-300 text-black
+                         {% endif %}">
+            {% if current_user.is_following(user) %}
+              Unfollow
+            {% else %}
+              Follow
+            {% endif %}
+          </button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold text-yellow-400 mb-1">Tentang</h3>
+    <p class="text-white whitespace-pre-wrap">
+      {{ user.bio or "Belum ada deskripsi diri." }}
+    </p>
+  </div>
+
+  {% if current_user.id == user.id %}
+    <div class="mt-8 text-right">
+      <a href="{{ url_for('main.edit_profile') }}"
+         class="inline-block px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-lg transition duration-200 shadow">
+        Edit Profil
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

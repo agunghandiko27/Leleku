@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-8 p-4">
+  <h2 class="text-xl font-bold text-yellow-400 mb-4">Notifikasi</h2>
+
+  {% if notifications %}
+    <ul class="space-y-4">
+      {% for notif in notifications %}
+      <li class="bg-gray-800 p-3 rounded-lg shadow-md flex justify-between items-center">
+        <div>
+          <p class="text-white">{{ notif.message }}</p>
+          <p class="text-xs text-gray-400">{{ notif.timestamp.strftime('%d %b %Y • %H:%M') }}</p>
+        </div>
+        {% if not notif.is_read %}
+          <span class="text-xs text-yellow-400">Baru</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-400">Belum ada notifikasi.</p>
+  {% endif %}
+</div>
+{% endblock %}

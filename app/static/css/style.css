@@ -1,0 +1,176 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #000; /* dark mode */
+  color: #fff;
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #eab308;
+  border-radius: 10px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 1.25rem 2.5rem 0.5rem 0.75rem;
+  font-size: 1rem;
+  background-color: #1f2937;
+  border-radius: 0.5rem;
+  border: none;
+  color: #fff;
+  outline: none;
+}
+
+.input-group label {
+  position: absolute;
+  top: 50%;
+  left: 0.75rem;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #aaa;
+  pointer-events: none;
+  background-color: transparent;
+  transition: 0.2s ease all;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+  top: 0.3rem;
+  left: 0.6rem;
+  font-size: 0.75rem;
+  color: #facc15;
+  background-color: #1f2937;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10;
+}
+
+button {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #facc15;
+  transform: scale(1.02);
+}
+
+a {
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #facc15;
+}
+
+button:focus, button:active,
+a:focus, a:active,
+i:focus, i:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+button i, a i {
+  font-size: 1.25rem;
+  line-height: 1;
+  vertical-align: middle;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.fa-heart:hover {
+  transform: scale(1);
+}
+
+.fa-comment:hover {
+  color: #facc15;
+  transform: scale(1);
+}
+
+button:active i,
+a:active i {
+  transform: scale(0.95);
+}
+
+{
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#chat-box {
+  transition: opacity 0.3s ease-in-out;
+}
+
+footer {
+  margin-top: 3rem;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: #111;
+  border-top: 1px solid #333;
+  box-shadow: 0 -2px 8px rgba(255, 255, 255, 0.05);
+  letter-spacing: 0.5px;
+}
+
+footer .brand {
+  color: #facc15;
+  font-weight: 600;
+}
+
+.alert {
+  animation: slideFade 0.4s ease-out;
+}
+
+@keyframes slideFade {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes grow {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+.animate-grow_5s_linear {
+  animation: grow 5s linear forwards;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

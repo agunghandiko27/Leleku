@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-xl mx-auto pt-12 space-y-3">
+
+ <div class="story-section bg-black py-4 px-2">
+    <div class="flex items-center space-x-4 overflow-x-auto scroll-smooth scrollbar-hide">
+
+        <!-- Upload story -->
+        <div class="flex flex-col items-center">
+            <a href="{{ url_for('main.story_preview') }}">
+                <div class="w-20 h-20 rounded-full border-4 border-dashed border-yellow-400 bg-gray-800 flex items-center justify-center">
+                    <i class="fas fa-camera text-white text-3xl"></i>
+                </div>
+            </a>
+            <div class="text-white text-xs mt-1">Tambah</div>
+        </div>
+
+        <!-- Story dari semua user -->
+        {% for user in users_with_story %}
+        <div class="flex flex-col items-center">
+            <a href="{{ url_for('main.view_story', user_id=user.id, index=0) }}">
+                <div class="relative">
+                    {% if user.latest_story and user.latest_story.image %}
+                    <img src="{{ url_for('static', filename='story_uploads/' + user.latest_story.image) }}"
+                         class="w-20 h-20 rounded-full object-cover border-4 border-yellow-400"
+                         onerror="this.style.display='none';">
+                    {% else %}
+                    <div class="w-20 h-20 rounded-full border-4 border-yellow-400 bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-image text-white text-2xl"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            <div class="text-white text-xs mt-1">{{ user.username }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+  
+  <!-- 📝 FORM POSTINGAN -->
+  <div class="bg-gray-900 p-4 rounded-2xl shadow space-y-3">
+    <div class="flex justify-center">
+      <a href="{{ url_for('main.create_post') }}" class="w-full max-w-xl">
+        <div class="bg-gray-900 p-4 rounded-2xl shadow-lg space-y-3 cursor-text border border-gray-800 hover:shadow-xl transition duration-300 ease-in-out">
+          <div class="flex gap-4 items-center">
+            <img src="{{ url_for('static', filename='images/' ~ (current_user.photo or 'default.jpg')) }}"
+                 class="w-11 h-11 rounded-full object-cover border-2 border-yellow-400 shadow-sm">
+            <div class="flex-1">
+              <div class="w-full bg-black text-white border border-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-800 transition duration-200">
+                Apa yang kamu pikirkan?
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+ 
+   <!-- 📌 Semua Postingan -->    
+ {% for post in posts %}    
+<div class="bg-gray-900 p-4 rounded-2xl shadow-md space-y-2 relative">    
+ 
+   <!-- Header Postingan -->
+<div class="flex justify-between items-start text-sm text-gray-400">    
+  <div class="flex items-center gap-2">    
+    <!-- Foto Profil -->    
+    <img src="{{ url_for('static', filename='images/' ~ (post.user.photo if post.user.photo else 'default.jpg')) }}"    
+         alt="Foto Profil" class="w-8 h-8 rounded-full object-cover border border-gray-700">    
+
+    <!-- Nama & Username -->    
+    <div class="flex flex-col leading-tight">    
+      <div class="flex items-center">
+        <span class="text-white font-semibold text-sm">{{ post.user.name }}</span>
+      </div>
+      <div class="flex items-center">
+        <span class="text-gray-400 text-xs">{{ post.user.username }}</span>
+        {% if post.user.is_verified %}
+          <i class="bi bi-patch-check-fill text-blue-400 text-xs ml-1"></i>
+        {% endif %}
+        <span class="text-gray-400 text-xs ml-1">• {{ post.timestamp.strftime('%d %b %Y %H:%M') }}</span>
+      </div>
+    </div>    
+  </div>
+
+    <!-- Dropdown Edit/Hapus -->
+    {% if session['user_id'] == post.user_id %}
+    <div class="relative inline-block text-left">
+      <button onclick="toggleDropdown('{{ post.id }}')" class="text-gray-400 hover:text-yellow-400 text-lg focus:outline-none">
+        <i class="bi bi-three-dots-vertical"></i>
+      </button>
+
+      <div id="dropdown-{{ post.id }}"
+           class="hidden absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-700 rounded-md shadow-md z-20 transition duration-150 ease-in-out">
+        <a href="{{ url_for('main.edit_post', post_id=post.id) }}"
+           class="block px-4 py-2 text-sm text-white hover:bg-gray-700 rounded-t">
+          <i class="bi bi-pencil mr-2"></i>Edit
+        </a>
+        <form action="{{ url_for('main.delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirmDeleteWithPopup(this)">
+          <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b">
+            <i class="bi bi-trash mr-2"></i>Hapus
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Popup Konfirmasi Hapus -->
+  <div id="confirm-delete-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-gray-900 text-white p-6 rounded-xl shadow-lg w-80 text-center border border-gray-700">
+      <p class="text-lg font-semibold mb-4">Yakin ingin menghapus postingan ini?</p>
+      <div class="flex justify-center gap-4">
+        <form id="delete-form-popup" method="POST">
+          <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg">Hapus</button>
+        </form>
+        <button type="button" onclick="closeDeletePopup()" class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded-lg">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Konten Post -->
+  <p class="text-white">{{ post.text }}</p>
+  {% if post.image %}
+  <img src="{{ url_for('static', filename='uploads/' ~ post.image) }}"
+       alt="Post Image"
+       class="w-full max-h-96 object-cover rounded-md border border-gray-700 cursor-pointer">
+  {% endif %}
+
+  <!-- Aksi Like dan Komentar -->
+  <div class="flex items-center gap-6 mt-2 text-xl">
+    <!-- Tombol Like -->
+    <button onclick="toggleLike({{ post.id }})"
+            class="like-button flex items-center gap-1 focus:outline-none active:outline-none">
+      <i id="like-icon-{{ post.id }}"
+         class="fas fa-heart transition-all duration-200 ease-in-out
+         {% if current_user.is_authenticated and current_user.has_liked_post(post) %}
+           text-red-500
+         {% else %}
+           text-white
+         {% endif %}"></i>
+      <span id="like-count-{{ post.id }}" class="text-sm text-white">{{ post.like_count() }}</span>
+    </button>
+
+    <!-- Tombol Komentar -->
+    <a href="{{ url_for('main.view_comments', post_id=post.id) }}"
+       class="comment-button flex items-center gap-1 focus:outline-none active:outline-none">
+      <i class="fas fa-comment text-white transition-all duration-200 ease-in-out hover:text-yellow-400"></i>
+      <span id="comment-count-{{ post.id }}" class="text-sm text-white">
+        {{ post.comments|length }}
+      </span>
+    </a>
+  </div>
+
+  <!-- Komentar -->
+  <div id="comment-section-{{ post.id }}" class="mt-4">
+    <form onsubmit="submitComment(event, {{ post.id }})" class="flex gap-2">
+      <input type="text" name="text" id="comment-input-{{ post.id }}"
+             placeholder="Tulis komentar..."
+             class="flex-1 bg-gray-800 text-white rounded px-3 py-1 text-sm focus:outline-none">
+      <button type="submit"
+              class="bg-yellow-400 text-black rounded px-3 py-1 text-sm font-semibold hover:bg-yellow-500">Kirim</button>
+    </form>
+
+    <div id="comment-list-{{ post.id }}" class="mt-2 space-y-1 text-sm text-white">
+      {% for comment in post.comments %}
+      <div><strong>{{ comment.user.name }}</strong>: {{ comment.text }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+</div>
+
+<!-- 📦 JavaScript -->
+
+<script>
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(`dropdown-${id}`);
+    dropdown.classList.toggle('hidden');
+  }
+
+  function showImagePopup(src) {
+    const container = document.getElementById("popup-image-container");
+    const image = document.getElementById("popup-image");
+    image.src = src;
+    container.classList.remove("hidden");
+    container.classList.add("flex");
+  }
+
+  function hideImagePopup() {
+    const container = document.getElementById("popup-image-container");
+    container.classList.remove("flex");
+    container.classList.add("hidden");
+    document.getElementById("popup-image").src = "";
+  }
+
+  document.addEventListener("click", function (e) {
+    const dropdowns = document.querySelectorAll("[id^='dropdown-']");
+    dropdowns.forEach(d => {
+      if (!d.contains(e.target) && !d.previousElementSibling.contains(e.target)) {
+        d.classList.add("hidden");
+      }
+    });
+  });
+
+  function confirmDeleteWithPopup(form) {
+    const popup = document.getElementById("confirm-delete-popup");
+    const deleteForm = document.getElementById("delete-form-popup");
+
+    deleteForm.action = form.action;
+    popup.classList.remove("hidden");
+    popup.classList.add("flex");
+    return false; // mencegah form langsung submit
+  }
+
+  function closeDeletePopup() {
+    const popup = document.getElementById("confirm-delete-popup");
+    popup.classList.remove("flex");
+    popup.classList.add("hidden");
+  }
+
+  function toggleLike(postId) {
+    fetch(`/like/${postId}`, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const icon = document.getElementById(`like-icon-${postId}`);
+      const likeCount = document.getElementById(`like-count-${postId}`);
+      const commentCount = document.getElementById(`comment-count-${postId}`);
+
+      // Update jumlah like
+      if (likeCount) likeCount.textContent = data.likes_count;
+
+      // Update jumlah komentar (kalau disediakan oleh server)
+      if (commentCount && data.comments_count !== undefined) {
+        commentCount.textContent = data.comments_count;
+      }
+
+      // Toggle warna icon like
+      if (data.status === 'liked') {
+        icon.classList.add('text-red-500');
+        icon.classList.remove('text-white');
+      } else {
+        icon.classList.add('text-white');
+        icon.classList.remove('text-red-500');
+      }
+    });
+  }
+
+  function submitComment(e, postId) {
+    e.preventDefault();
+    const input = document.getElementById(`comment-input-${postId}`);
+    const text = input.value.trim();
+    if (!text) return;
+
+    fetch(`/comment/${postId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: JSON.stringify({ text })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        const list = document.getElementById(`comment-list-${postId}`);
+        const newComment = document.createElement("div");
+        newComment.innerHTML = `<strong>${data.comment.user}</strong>: ${data.comment.text}`;
+        list.appendChild(newComment);
+        input.value = "";
+      } else {
+        alert("Gagal mengirim komentar");
+      }
+    });
+  }
+
+</script>
+
+{% endblock %}
